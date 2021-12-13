@@ -1,0 +1,31 @@
+version: '3.4'
+
+services:
+  cache-products.redisserver:
+    container_name: cacheproductsREDIS
+    image: redis
+    networks:
+      - cache-products-net
+  cache-products.sqlserver:
+    container_name: cacheproductsMSSQL
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    networks:
+      - cache-products-net
+  cache-products:
+    container_name: cacheproductsSERVER
+    image: ${DOCKER_REGISTRY-}cacheproducts
+    depends_on:
+      - cache-products.sqlserver
+      - cache-products.redisserver
+    build:
+      context: .
+      dockerfile: Dockerfile
+    networks:
+      - cache-products-net
+      
+networks:
+  cache-products-net:
+    driver: bridge
+
+volumes:
+  mssql_data:
